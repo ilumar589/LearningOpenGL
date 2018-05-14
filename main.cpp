@@ -1,6 +1,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include "headers/Utility/Utility.h"
+
 
 const int WINDOW_WIDTH = 800;
 const int WIDOW_HEIGHT = 600;
@@ -27,6 +29,19 @@ void draw2DTriangle() {
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    char* vertexShaderSource = static_cast<char *>({"#version 330 core\n"
+                                   "layout (location = 0) in vec3 aPos; \n"
+                                   "\n"
+                                   "void main() {\n"
+                                   "    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0); \n"
+                                   "}"}); // this will be moved to a glsl file
+
+    unsigned int vertexShader;
+    vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
+    glCompileShader(vertexShader);
+    project_utility::shaderInfo(vertexShader);
 }
 
 int main() {
@@ -70,6 +85,7 @@ int main() {
     }
 
     glfwTerminate();
+
     return 0;
 }
 
