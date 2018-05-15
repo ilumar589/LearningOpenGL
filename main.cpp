@@ -30,12 +30,12 @@ void draw2DTriangle() {
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    char* vertexShaderSource = static_cast<char *>({"#version 330 core\n"
-                                   "layout (location = 0) in vec3 aPos; \n"
-                                   "\n"
-                                   "void main() {\n"
-                                   "    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0); \n"
-                                   "}"}); // this will be moved to a glsl file
+    char* vertexShaderSource = new char("#version 330 core\n"
+                                        "layout (location = 0) in vec3 aPos; \n"
+                                        "\n"
+                                        "void main() {\n"
+                                        "    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0); \n"
+                                        "}");  // this will be moved to a glsl file
 
     unsigned int vertexShader;
     vertexShader = glCreateShader(GL_VERTEX_SHADER);
