@@ -18,7 +18,7 @@ void processInput(GLFWwindow* window) {
     }
 }
 
-void draw2DTriangle() {
+unsigned int setup2DTriangle() {
     float vertices[] {
             -0.5f, -0.5f, 0.0f,
             0.5f, -0.5f, 0.0f,
@@ -30,18 +30,56 @@ void draw2DTriangle() {
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    char* vertexShaderSource = new char("#version 330 core\n"
+    const char *vertexShaderSource = "#version 330 core\n"
                                         "layout (location = 0) in vec3 aPos; \n"
                                         "\n"
                                         "void main() {\n"
                                         "    gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0); \n"
-                                        "}");  // this will be moved to a glsl file
+                                        "}\0";  // this will be moved to a glsl file
 
     unsigned int vertexShader;
     vertexShader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
     glCompileShader(vertexShader);
+
     project_utility::shaderInfo(vertexShader);
+
+    const char *fragmentShaderSource = "#version 330 core\n"
+                                          "out vec4 FragColor;\n"
+                                          "\n"
+                                          "void main() {\n"
+                                          "    FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
+                                          "}\0"; // \0 pff c strings
+    unsigned int fragmentShader;
+    fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
+    glCompileShader(fragmentShader);
+
+    project_utility::shaderInfo(fragmentShader);
+
+    // shader program to link all shaders
+    unsigned int shaderProgram;
+    shaderProgram = glCreateProgram();
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragmentShader);
+    glLinkProgram(shaderProgram);
+
+    project_utility::shaderLinkingInfo(shaderProgram);
+
+    // delete shaders after they've been linked to the shader programs
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
+
+    // right now we've sent the gpu vertex data and instructed it how to process
+    // that data with a vertex and fragment shader but it has no idea how it should
+    // link the vertex data to the actual vertex shader
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    return shaderProgram;
+
+//    glUseProgram(shaderProgram);
 }
 
 int main() {
@@ -67,6 +105,8 @@ int main() {
     glViewport(0, 0, WINDOW_WIDTH, WIDOW_HEIGHT);
 
     glfwSetFramebufferSizeCallback(window, frameBufferSizeCallback);
+
+    unsigned int shaderProgram = setup2DTriangle();
 
     // render loop
     while (!glfwWindowShouldClose(window)) {
